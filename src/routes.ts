@@ -1,9 +1,9 @@
+import { Router } from "express"
 import { AuthController } from "./controllers/AuthController"
 import { UsersController } from "./controllers/UsersController"
 import { MusicController } from "./controllers/MusicController"
 import { PlaylistController } from "./controllers/PlaylistController"
-
-const { Router } = require("express")
+import { upload } from "./middlewares/UploadFile"
 
 export const routes = Router()
 
@@ -15,9 +15,16 @@ const playlistController = new PlaylistController();
 routes.post('/users', usersController.create)
 routes.post('/login', authController.authenticate)
 
-routes.get('/music', musicController.list)
-routes.post('/music', musicController.create)
-
 routes.post('/playlist', playlistController.create);
 routes.get('/playlist', playlistController.list);
 routes.get('/playlist/:id', playlistController.detail);
+
+routes.get('/music', musicController.list);
+routes.post('/music', upload.fields([
+	{
+		name: 'music',
+	}, {
+		name: 'thumbnail',
+	},
+]), musicController.create);
+

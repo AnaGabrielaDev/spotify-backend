@@ -1,13 +1,14 @@
-import "dotenv/config"
+import 'dotenv/config';
 
-import express from "express"
-import { routes } from "./routes"
+import express from 'express';
+import {routes} from './routes';
 
-const app = express()
+const app = express();
 
-app.use(express.json())
-app.use(routes)
+app.use(express.json());
+app.use('/public', express.static('public'));
+app.use(routes);
 
 app.listen(3000, () => {
-    console.log("server is running")
-})
+	console.log('server is running');
+});

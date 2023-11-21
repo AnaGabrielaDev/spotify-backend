@@ -3,7 +3,7 @@ import {AuthController} from './controllers/AuthController';
 import {UsersController} from './controllers/UsersController';
 import {MusicController} from './controllers/MusicController';
 import {PlaylistController} from './controllers/PlaylistController';
-import {upload} from './middlewares/UploadFile';
+import {upload} from './middlewares/uploadFile';
 import {authMiddleware} from './middlewares/authMiddleware';
 
 // eslint-disable-next-line new-cap

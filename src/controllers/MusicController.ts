@@ -6,20 +6,26 @@ import {mountFileUrl} from '../utils/mountFileUrl';
 
 export class MusicController {
 	async list(req: Request, res: Response) {
-		const {name} = req.query;
-		const filter: Prisma.MusicWhereInput = {};
+        const { name } = req.query;
 
-		if (name) {
-			filter.name = {
-				contains: String(name),
-			};
-		}
+        if (!name || typeof name !== 'string') {
+            return res.status(400).send("Nome da música é necessário para a busca.");
+        }
 
-		const musics = await connection.music.findMany({
-			where: filter,
-		});
-		res.json(musics);
-	}
+        const musics = await connection.music.findMany({
+            where: {
+                name: {
+                    contains: name
+                }
+            }
+        });
+
+        if (musics.length === 0) {
+            return res.status(404).send("Nenhuma música encontrada.");
+        }
+
+        return res.json(musics);
+    }
 
 	async create(req: Request, res: Response) {
 		const uploadArr = Object

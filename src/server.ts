@@ -1,11 +1,13 @@
 import 'dotenv/config';
 
 import express from 'express';
+import helmet from 'helmet';
 import {routes} from './routes';
 import { httpLogger, logger } from './utils/logger';
 
 const app = express();
 
+app.use(helmet());
 app.use(httpLogger)
 app.use(express.json());
 app.use('/public', express.static('public'));

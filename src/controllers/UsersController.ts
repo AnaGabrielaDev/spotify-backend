@@ -22,6 +22,17 @@ export class UsersController {
 			});
 		}
 
+		const userAlreadyExists = await connection.user.findUnique({
+			where: {
+				email: req.body.email,
+			},
+		});
+		if (userAlreadyExists) {
+			return res.status(400).json({
+				error: 'User already exists',
+			});
+		}
+
 		const hashPassword = await bcrypt.hash(req.body.password as string, 12);
 		const user = await connection.user.create({
 			data: {

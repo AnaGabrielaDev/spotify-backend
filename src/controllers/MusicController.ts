@@ -1,12 +1,9 @@
 import {type Request, type Response} from 'express';
 import {type Prisma} from '@prisma/client';
 import {connection} from '../database/connection';
+import {mountFileUrl} from '../utils/mountFileUrl';
 
-type CreateMusic = {
-	name: string;
-	thumbnail: string;
-	url: string;
-};
+
 export class MusicController {
 	async list(req: Request, res: Response) {
 		const {name} = req.query;
@@ -26,31 +23,32 @@ export class MusicController {
 
 	async create(req: Request, res: Response) {
 		const uploadArr = Object
-			.values(req.files!);
+			.values(req.files!)
+      .map((file: any) => file[0])
 
 		const musicFile = uploadArr.find(file => file.fieldname === 'music');
 		const thumbnail = uploadArr.find(file => file.fieldname === 'thumbnail');
 
-		const musicPath = this.mountUrl(req, musicFile.path);
-		const thumbnailPath = this.mountUrl(req, req.files?.thumbnail[0].path as string);
+    if(!musicFile || !thumbnail) {
+      return res.status(400).json({
+        error: 'Missing files',
+      });
+    }
 
-		const {name} = req.body as CreateMusic;
+		const musicPath = mountFileUrl(req, musicFile.path);
+		const thumbnailPath = mountFileUrl(req, thumbnail.path);
+
+		const {name} = req.body;
 		const music = await connection.music.create(
 			{
 				data: {
 					name,
 					url: musicPath,
-					thumbnail: '',
+					thumbnail: thumbnailPath,
 				},
 			},
 		);
 
 		return res.status(201).json(music);
-	}
-
-	private mountUrl(req: Request, path: string) {
-		const {host} = req.headers;
-		const filePath = `${req.protocol}://${host}/${path}`;
-		return filePath;
 	}
 }

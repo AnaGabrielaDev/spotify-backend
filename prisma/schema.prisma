@@ -11,19 +11,42 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  name String
-  email String @unique
-  password String
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  playlists Playlist[]
 
   @@map("users")
 }
 
 model Music {
-  id Int @id @default(autoincrement())
-  name String
-  url String
+  id        Int    @id @default(autoincrement())
+  name      String
+  url       String
   thumbnail String
 
+  PlaylistToMusic PlaylistToMusic[]
+
   @@map("musics")
+}
+
+model PlaylistToMusic {
+  playlistId Int
+  musicId    Int
+
+  Playlist Playlist @relation(fields: [playlistId], references: [id])
+  Music    Music    @relation(fields: [musicId], references: [id])
+
+  @@id([playlistId, musicId])
+}
+
+model Playlist {
+  id        Int    @id @default(autoincrement())
+  name      String
+  thumbnail String
+  userId    Int?
+
+  User            User?             @relation(fields: [userId], references: [id])
+  PlaylistToMusic PlaylistToMusic[]
 }

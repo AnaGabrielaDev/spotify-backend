@@ -1,13 +1,19 @@
-import "dotenv/config"
+import 'dotenv/config';
 
-import express from "express"
-import { routes } from "./routes"
+import express from 'express';
+import helmet from 'helmet';
+import {routes} from './routes';
+import { httpLogger, logger } from './utils/logger';
 
-const app = express()
+const app = express();
 
-app.use(express.json())
-app.use(routes)
+app.use(helmet());
+app.use(httpLogger)
+app.use(express.json());
+app.use('/public', express.static('public'));
+app.use(routes);
 
-app.listen(3000, () => {
-    console.log("server is running")
-})
+const port = process.env.PORT ?? 3000;
+app.listen(port, () => {
+  logger.info(`server is running http://localhost:${port}`);
+});

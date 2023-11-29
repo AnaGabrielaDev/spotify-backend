@@ -67,18 +67,12 @@ export class PlaylistController {
 			});
 		}
 
-		await connection.playlist.update({
-			where: {
-				id: playlistId,
-			},
-			data: {
-				PlaylistToMusic: {
-					create: {
-						musicId: parseInt(musicId, 10),
-					},
-				},
-			},
-		});
+		await connection.playlistToMusic.create({
+      data: {
+        musicId: parseInt(musicId, 10),
+        playlistId: playlist.id
+      }
+    });
 
 		res.json(playlist);
 	}

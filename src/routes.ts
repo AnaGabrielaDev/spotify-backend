@@ -14,6 +14,7 @@ const musicController = new MusicController();
 const playlistController = new PlaylistController();
 
 routes.post('/users', usersController.create);
+routes.put('/users', authMiddleware(), usersController.editUser);
 routes.post('/login', authController.authenticate);
 
 routes.get('/playlist', authMiddleware(true), playlistController.list);

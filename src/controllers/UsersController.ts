@@ -46,4 +46,50 @@ export class UsersController {
 			userId: user.id,
 		});
 	}
+
+  async editUser(req: Request, res: Response) {
+    const userId = req.user.sub;
+    const requiredFields = ['name', 'email', 'password'];
+		const errors = [] as string[];
+		for (const field of requiredFields) {
+			const value = req.body[field] as string;
+			if (value) {
+				continue;
+			}
+
+			errors.push(`${field} as required`);
+		}
+
+		if (errors.length > 0) {
+			return res.status(400).json({
+				errors,
+			});
+		}
+
+    const user = await connection.user.findUnique({
+      where: {
+        id: parseInt(userId)
+      }
+    })
+
+    if (!user) {
+      return res.status(400).json({
+        error: 'User not found'
+      })
+    }
+
+    const hashPassword = await bcrypt.hash(req.body.password as string, 12);
+    const updatedUser = await connection.user.update({
+      where: {
+        id: parseInt(userId)
+      },
+      data: {
+        name: req.body.name,
+        email: req.body.email,
+        password: hashPassword
+      }
+    })
+
+    return res.json(updatedUser);
+  }
 }

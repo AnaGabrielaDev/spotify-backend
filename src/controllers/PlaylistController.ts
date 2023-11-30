@@ -6,20 +6,26 @@ export class PlaylistController {
 	async create(req: Request, res: Response) {
 		const {name} = req.body;
     const thumbnail = req.file?.path;
-    if (!thumbnail) {
-      return res.status(400).json({
-        error: 'Missing thumbnail',
-      })
+    let playlist
+    if (thumbnail) {
+      const thumbnailUrl = mountFileUrl(req, thumbnail);
+      playlist = await connection.playlist.create({
+        data: {
+          name, thumbnail: thumbnailUrl, userId: req.user.sub,
+        },
+      });
+    }else {
+      playlist = await connection.playlist.create({
+        data: {
+          name, thumbnail: req.body.thumbnail, userId: req.user.sub,
+        },
+      });
     }
 
-    const thumbnailUrl = mountFileUrl(req, thumbnail);
-		await connection.playlist.create({
-			data: {
-				name, thumbnail: thumbnailUrl, userId: req.user.sub,
-			},
-		});
 
-		res.status(201).send();
+		res.status(201).json({
+      id: playlist.id
+    });
 	}
 
 	async list(req: Request, res: Response) {
@@ -45,9 +51,30 @@ export class PlaylistController {
 			where: {
 				id: parseInt(id, 10),
 			},
+      include: {
+        PlaylistToMusic: {
+          include: {
+            Music: true,
+          }
+        }
+      }
 		});
+    if(!playlist) {
+      return res.json({})
+    }
 
-		res.json(playlist);
+		res.json({
+      id: playlist.id,
+      name: playlist.name,
+      thumbnail: playlist.thumbnail,
+      userId: playlist.userId,
+      musics: playlist.PlaylistToMusic.map((playlistToMusic) => ({
+        id: playlistToMusic.musicId,
+        name: playlistToMusic.Music.name,
+        thumbnail: playlistToMusic.Music.thumbnail,
+        url: playlistToMusic.Music.url,
+      }))
+    });
 	}
 
 	async addMusic(req: Request, res: Response) {
